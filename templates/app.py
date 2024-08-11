@@ -1,70 +1,96 @@
 import tkinter as tk
 from tkinter import messagebox
 
-# Function to update the expression in the input field
-def press(num):
-    global expression
-    expression = expression + str(num)
-    equation.set(expression)
-
-# Function to evaluate the final expression
-def equalpress():
-    try:
-        global expression
-        total = str(eval(expression))
-        equation.set(total)
-        expression = ""
-    except ZeroDivisionError:
-        equation.set("Error")
-        expression = ""
-    except:
-        equation.set("Error")
-        expression = ""
-
-# Function to clear the input field
-def clear():
-    global expression
-    expression = ""
-    equation.set("")
-
-# Main GUI setup
-if __name__ == "__main__":
-    # Creating main window
-    root = tk.Tk()
-    root.title("Modern Calculator")
-    root.configure(background="lightgray")
-    root.geometry("400x500")
+# Function to add student data
+def add_student():
+    name = entry_name.get()
+    math = entry_math.get()
+    science = entry_science.get()
+    english = entry_english.get()
     
-    # Global variable for expression
-    expression = ""
+    if not name or not math or not science or not english:
+        messagebox.showerror("Input Error", "All fields are required")
+        return
+    
+    try:
+        math = float(math)
+        science = float(science)
+        english = float(english)
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter valid marks")
+        return
+    
+    total = math + science + english
+    average = total / 3
+    
+    student_data[name] = {
+        "Math": math,
+        "Science": science,
+        "English": english,
+        "Total": total,
+        "Average": average
+    }
+    
+    messagebox.showinfo("Success", f"Data for {name} added successfully!")
+    clear_entries()
 
-    # StringVar to update the input field
-    equation = tk.StringVar()
+# Function to clear input fields
+def clear_entries():
+    entry_name.delete(0, tk.END)
+    entry_math.delete(0, tk.END)
+    entry_science.delete(0, tk.END)
+    entry_english.delete(0, tk.END)
 
-    # Input field
-    input_field = tk.Entry(root, textvariable=equation, font=('Arial', 20), bd=10, insertwidth=4, width=14, borderwidth=4, bg="powder blue")
-    input_field.grid(columnspan=4, ipadx=8)
+# Function to display report
+def show_report():
+    if not student_data:
+        messagebox.showinfo("No Data", "No student data available")
+        return
+    
+    report_window = tk.Toplevel(root)
+    report_window.title("Student Marks Report")
+    report_window.geometry("400x300")
+    
+    report_text = tk.Text(report_window, font=('Arial', 12))
+    report_text.pack(expand=True, fill='both')
+    
+    for name, data in student_data.items():
+        report_text.insert(tk.END, f"Name: {name}\n")
+        report_text.insert(tk.END, f"Math: {data['Math']}\n")
+        report_text.insert(tk.END, f"Science: {data['Science']}\n")
+        report_text.insert(tk.END, f"English: {data['English']}\n")
+        report_text.insert(tk.END, f"Total: {data['Total']}\n")
+        report_text.insert(tk.END, f"Average: {data['Average']:.2f}\n")
+        report_text.insert(tk.END, "-"*30 + "\n")
 
-    # Buttons
-    buttons = [
-        ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('/', 1, 3),
-        ('4', 2, 0), ('5', 2, 1), ('6', 2, 2), ('*', 2, 3),
-        ('1', 3, 0), ('2', 3, 1), ('3', 3, 2), ('-', 3, 3),
-        ('0', 4, 0), ('.', 4, 1), ('+', 4, 2), ('=', 4, 3),
-    ]
+# Main application setup
+root = tk.Tk()
+root.title("Modern Student Marks Report")
+root.geometry("400x400")
+root.configure(background="lightgray")
 
-    for (text, row, col) in buttons:
-        if text == '=':
-            button = tk.Button(root, text=text, padx=20, pady=20, bd=8, fg="black", bg="light green",
-                               font=('Arial', 18), command=equalpress)
-        else:
-            button = tk.Button(root, text=text, padx=20, pady=20, bd=8, fg="black", bg="light yellow",
-                               font=('Arial', 18), command=lambda t=text: press(t))
-        button.grid(row=row, column=col)
+student_data = {}
 
-    clear_button = tk.Button(root, text="C", padx=20, pady=20, bd=8, fg="black", bg="light coral",
-                             font=('Arial', 18), command=clear)
-    clear_button.grid(row=5, column=0, columnspan=4)
+# Labels and entry fields
+tk.Label(root, text="Student Name", font=('Arial', 14), bg="lightgray").pack(pady=10)
+entry_name = tk.Entry(root, font=('Arial', 14), width=20)
+entry_name.pack()
 
-    # Start the GUI event loop
-    root.mainloop()
+tk.Label(root, text="Math Marks", font=('Arial', 14), bg="lightgray").pack(pady=10)
+entry_math = tk.Entry(root, font=('Arial', 14), width=20)
+entry_math.pack()
+
+tk.Label(root, text="Science Marks", font=('Arial', 14), bg="lightgray").pack(pady=10)
+entry_science = tk.Entry(root, font=('Arial', 14), width=20)
+entry_science.pack()
+
+tk.Label(root, text="English Marks", font=('Arial', 14), bg="lightgray").pack(pady=10)
+entry_english = tk.Entry(root, font=('Arial', 14), width=20)
+entry_english.pack()
+
+# Buttons to add data and show report
+tk.Button(root, text="Add Student", font=('Arial', 14), bg="lightblue", command=add_student).pack(pady=20)
+tk.Button(root, text="Show Report", font=('Arial', 14), bg="lightgreen", command=show_report).pack(pady=10)
+
+# Run the main event loop
+root.mainloop()
